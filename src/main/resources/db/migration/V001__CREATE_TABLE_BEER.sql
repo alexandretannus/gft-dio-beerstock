@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS beer (
+    id BIGSERIAL PRIMARY KEY,
+    beer_name VARCHAR(200) NOT NULL UNIQUE,
+    brand VARCHAR(200) NOT NULL,
+    max_stock INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 0,
+    beer_type VARCHAR NOT NULL
+);
