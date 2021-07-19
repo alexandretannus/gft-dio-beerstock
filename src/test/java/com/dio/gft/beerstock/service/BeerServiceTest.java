@@ -12,6 +12,7 @@ import com.dio.gft.beerstock.builder.BeerDTOBuilder;
 import com.dio.gft.beerstock.dto.BeerDTO;
 import com.dio.gft.beerstock.entity.Beer;
 import com.dio.gft.beerstock.exception.BeerAlreadyRegisteredException;
+import com.dio.gft.beerstock.exception.BeerNotFoundException;
 import com.dio.gft.beerstock.mapper.BeerMapper;
 import com.dio.gft.beerstock.repository.BeerRepository;
 
@@ -63,5 +64,31 @@ public class BeerServiceTest {
         // then
         assertThrows(BeerAlreadyRegisteredException.class, () -> beerService.createBeer(expectedBeerDTO));
     }
-   
+    
+    @Test
+    void whenValidBeerNameIsGivenThenReturnABeer() throws BeerNotFoundException {
+        // given
+        BeerDTO expectedFoundBeerDTO = BeerDTOBuilder.builder().build().toBeerDTO();
+        Beer expectedFoundBeer = beerMapper.toModel(expectedFoundBeerDTO);
+
+        // when
+        when(beerRepository.findByName(expectedFoundBeer.getName())).thenReturn(Optional.of(expectedFoundBeer));
+
+        // then
+        BeerDTO foundBeerDTO = beerService.findByName(expectedFoundBeerDTO.getName());
+
+        assertThat(foundBeerDTO, is(equalTo(expectedFoundBeerDTO)));
+    }
+    
+    @Test
+    void whenNotRegisteredBeerNameIsGivenThenThrowAnException() {
+        // given
+        BeerDTO expectedFoundBeerDTO = BeerDTOBuilder.builder().build().toBeerDTO();
+
+        // when
+        when(beerRepository.findByName(expectedFoundBeerDTO.getName())).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(BeerNotFoundException.class, () -> beerService.findByName(expectedFoundBeerDTO.getName()));
+    }
 }
