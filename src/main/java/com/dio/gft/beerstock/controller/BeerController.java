@@ -5,14 +5,17 @@ import java.util.List;
 import javax.validation.Valid;
 
 import com.dio.gft.beerstock.dto.BeerDTO;
+import com.dio.gft.beerstock.dto.QuantityDTO;
 import com.dio.gft.beerstock.exception.BeerAlreadyRegisteredException;
 import com.dio.gft.beerstock.exception.BeerNotFoundException;
+import com.dio.gft.beerstock.exception.BeerStockExceededException;
 import com.dio.gft.beerstock.service.BeerService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,4 +53,8 @@ public class BeerController {
         beerService.deleteById(id);
     }
 
+    @PatchMapping("/{id}/increment")
+    public BeerDTO increment(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws BeerNotFoundException, BeerStockExceededException {
+        return beerService.increment(id, quantityDTO.getQuantity());
+    }
 }

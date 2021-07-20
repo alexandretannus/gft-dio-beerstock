@@ -8,6 +8,7 @@ import com.dio.gft.beerstock.dto.BeerDTO;
 import com.dio.gft.beerstock.entity.Beer;
 import com.dio.gft.beerstock.exception.BeerAlreadyRegisteredException;
 import com.dio.gft.beerstock.exception.BeerNotFoundException;
+import com.dio.gft.beerstock.exception.BeerStockExceededException;
 import com.dio.gft.beerstock.mapper.BeerMapper;
 import com.dio.gft.beerstock.repository.BeerRepository;
 
@@ -47,6 +48,21 @@ public class BeerService {
     public void deleteById(Long id) throws BeerNotFoundException {
         verifyIfExists(id);
         beerRepository.deleteById(id);
+    }
+
+    public BeerDTO increment(Long id, int quantityToIncrement) throws BeerNotFoundException, BeerStockExceededException {
+        Beer beerToIncrementStock = verifyIfExists(id);
+
+        int totalAfterIncrement = quantityToIncrement + beerToIncrementStock.getQuantity();
+
+        if (totalAfterIncrement <= beerToIncrementStock.getMax()) {
+            beerToIncrementStock.setQuantity(totalAfterIncrement);
+            Beer incrementedBeerStock = beerRepository.save(beerToIncrementStock);
+            return beerMapper.toDTO(incrementedBeerStock);
+        }
+
+        throw new BeerStockExceededException(id, quantityToIncrement);
+
     }
 
     private void verifyIfIsAlreadyRegistered(String name) throws BeerAlreadyRegisteredException {
