@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+
 import com.dio.gft.beerstock.builder.BeerDTOBuilder;
 import com.dio.gft.beerstock.dto.BeerDTO;
 import com.dio.gft.beerstock.exception.BeerNotFoundException;
@@ -46,6 +48,7 @@ public class BeerControllerTest {
                     .build();
     }
 
+    /* Beer Inclusion Tests */
     @Test
     void whenPOSTIsCalledThenABeerIsCreated() throws Exception {
         // given
@@ -77,6 +80,7 @@ public class BeerControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /* Find beer by name tests */
     @Test
     void whenGETIsCalledWithValidNameThenOkStatusIsReturned() throws Exception {
         // given
@@ -106,5 +110,37 @@ public class BeerControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get(BEER_API_URL_PATH + "/" + beerDTO.getName())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    /* Get all beers tests */
+    @Test
+    void whenGETListWithBeersIsCalledThenOkStatusIsReturned() throws Exception {
+        // given
+        BeerDTO beerDTO = BeerDTOBuilder.builder().build().toBeerDTO();
+
+        //when
+        when(beerService.listAll()).thenReturn(Collections.singletonList(beerDTO));
+
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get(BEER_API_URL_PATH)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name", is(beerDTO.getName())))
+                .andExpect(jsonPath("$[0].brand", is(beerDTO.getBrand())))
+                .andExpect(jsonPath("$[0].type", is(beerDTO.getType().toString())));
+    }
+    
+    @Test
+    void whenGETListWithoutBeersIsCalledThenOkStatusIsReturned() throws Exception {
+        // given
+        BeerDTO beerDTO = BeerDTOBuilder.builder().build().toBeerDTO();
+
+        //when
+        when(beerService.listAll()).thenReturn(Collections.singletonList(beerDTO));
+
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get(BEER_API_URL_PATH)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }
